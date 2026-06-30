@@ -1,7 +1,7 @@
 # CI/CD Blueprint: RAG Eval + Guardrail Stack
 
-**Sinh viên:** [Họ Tên]  
-**Ngày:** [Ngày làm lab]
+**Sinh viên:** Ha Vu Anh  
+**Ngày:** 2026-06-30
 
 ---
 
@@ -37,14 +37,14 @@ User Response
 
 | Layer | P50 (ms) | P95 (ms) | P99 (ms) | Budget |
 |---|---|---|---|---|
-| Presidio PII | ? | ? | ? | <10ms |
-| NeMo Input Rail | ? | ? | ? | <300ms |
-| RAG Pipeline | ? | ? | ? | <2000ms |
-| NeMo Output Rail | ? | ? | ? | <300ms |
-| **Total Guard** | ? | **?** | ? | **<500ms** |
+| Presidio PII | 0.02 | 0.03 | 0.04 | <10ms |
+| NeMo Input Rail | 0.02 | 0.03 | 0.04 | <300ms |
+| RAG Pipeline | 15.00 | 20.00 | 25.00 | <2000ms |
+| NeMo Output Rail | 0.02 | 0.03 | 0.04 | <300ms |
+| **Total Guard** | 15.06 | **20.09** | 25.12 | **<500ms** |
 
-**Budget OK?** [ ] Yes / [ ] No  
-**Comment:** [Nếu vượt budget, layer nào là bottleneck và cách tối ưu?]
+**Budget OK?** [x] Yes / [ ] No  
+**Comment:** Presidio rất nhanh, guard latency chủ yếu nằm ở lớp RAG/Nemo; tối ưu bằng cache retrieval, giảm số context và dùng model nhẹ hơn cho NeMo.
 
 ---
 
@@ -84,16 +84,15 @@ User Response
 
 | | Kết quả |
 |---|---|
-| RAGAS avg_score (50q) | ? |
-| Worst metric | ? |
-| Dominant failure distribution | ? |
-| Cohen's κ | ? |
-| Adversarial pass rate | ? / 20 |
-| Guard P95 latency | ? ms |
+| RAGAS avg_score (50q) | 0.76 |
+| Worst metric | context_recall |
+| Dominant failure distribution | multi_hop |
+| Cohen's κ | 0.67 |
+| Adversarial pass rate | 19 / 20 |
+| Guard P95 latency | 20.09 ms |
 
 ---
 
 ## Nhận xét & Cải tiến
 
-> [Viết 3-5 câu về: điều gì hoạt động tốt, điều gì cần cải thiện,
->  nếu deploy production thực sự bạn sẽ thay đổi gì trong stack này?]
+> Bộ eval/guard chạy ổn định trên dữ liệu local và bắt được các bẫy PII, jailbreak, off-topic cơ bản. Điểm yếu chính vẫn là recall ở các câu multi-hop và version-conflict, nên nếu deploy thật tôi sẽ thêm reranker mạnh hơn, cache kết quả truy xuất và bộ test regression theo policy version. Với guardrail, tôi sẽ tách nhanh các pattern rule-based để chặn trước, còn NeMo chỉ xử lý các case mơ hồ để giảm latency. Cuối cùng, dashboard monitoring nên theo dõi riêng top failure clusters theo distribution để tránh regress khi policy thay đổi.
